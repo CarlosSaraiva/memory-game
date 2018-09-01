@@ -1,5 +1,36 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+#app {
+  color: #2c3e50;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 18px;
+  margin-top: 60px;
+  text-align: center;
+}
+
+.logo {
+  height: 100px;
+  width: 200px;
+}
+
+.list {
+  display: grid;
+  font-weight: bold;
+  list-style-type: none;
+  grid-gap: 54px;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.list li {
+  margin-bottom: 10px;
+  padding-top: 8px;
+}
+
+.img-cards {
+  border: 2px solid #5f0214;
+  border-radius: 3px;
+  cursor: pointer;
+  height: 250px;
+  margin-top: 8px;
+  width: 200px;
 }
