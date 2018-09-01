@@ -1,43 +1,93 @@
 import React, { Component } from 'react'
-import logo from './assets/marvel-logo.png';
-import './App.css';
+import logo from './assets/marvel-logo.png'
+import './App.css'
 import { get } from './services'
+
+const Card = ({ front, back, onPress, flipped, disabled }) => (
+  <div className={`flip-container ${flipped}`} onMouseDown={!disabled && onPress}>
+    <div className="flipper">
+      <div className="front">
+      {front()}
+      </div>
+      <div className="back">
+      {back()}
+      </div>
+    </div>
+  </div>
+)
 
 class App extends Component {
   state = {
     title: "Memory game",
-    cards: []
+    cards: [],
+    counter: 0
   }
 
-  componentDidMount() {
-    get()
-      .then((response) => {
-        const game = response.data.data
-        const filteredGame = game.results.filter(
-          function filter(character) {
-            return !character.thumbnail.path.endsWith('image_not_available')
-          }
-        )
-          this.setState({ cards: filteredGame })
-      })
-  }
+  filterNotAvailableImage = character => !character.thumbnail.path.endsWith('image_not_available')
 
+  frontImage = (src, alt) => () => (
+    <img 
+      className="img-cards" 
+      src={src}
+      alt={alt}
+    />
+  )
+
+  backImage = () => (
+    <div
+      className="img-cards" 
+      style={{ backgroundColor: 'black' }}
+
+    />
+  )
+
+  flipit = card => e => {
+    const counter = this.state.counter === 1 ? 0 : this.state.counter + 1
+
+    this.setState({
+      counter, 
+      cards: this.state.cards.map(this.swap(card)),
+      disabled: this.state.counter === 1
+    })
+
+    if(this.state.counter === 1) setTimeout(() => {
+      this.setState({ cards: this.state.cards.map(this.reset), disabled: false })
+    }, 800)
+    
+  } 
+
+  swap = card => item => item.name === card.name 
+    ? ({...item, flipped: item.flipped === 'flipped' ? 'none' : 'flipped' })
+    : ({...item})
+
+  reset = card => ({ ...card, flipped: 'flipped' })
+
+  async componentDidMount() {
+    const { data } = await get()
+    
+    const filteredGame = data.results
+                             .filter(this.filterNotAvailableImage)
+                             .map(card => ({ ...card, flipped: 'flipped' }))
+
+    this.setState({ cards: filteredGame })
+  }
 
   render() {
     return (
       <div id="app">
         <div className="app">
-          <img src={ logo } className="logo" />
-          <h1>{ this.state.title }</h1>
+          <img src={logo} className="logo" />
+          <h1>{this.state.title}</h1>
           <ul className="list">
           {this.state.cards.map((card, index) => (
-            <li>
-              <img 
-                className="img-cards" 
-                src={`${card.thumbnail.path}.${card.thumbnail.extension}`}
-                alt={card.name}
-              />
-            </li>
+            <Card
+              key={card.id}
+              disabled={this.state.disabled}
+              onPress={this.flipit(card)}
+              flipped={card.flipped}
+              front={this.frontImage(`${card.thumbnail.path}.${card.thumbnail.extension}`, card.name)}
+              back={this.backImage}
+            />
           ))}
           </ul>
         </div>
@@ -46,4 +96,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default App
